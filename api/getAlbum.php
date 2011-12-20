@@ -8,6 +8,7 @@ if(!preg_match("/^[a-z0-9]+$/",$album)){ nok("Invalid Album Chars"); }
 if(!file_exists("/var/www/albums/$album")){ nok("Album Does Not Exist"); }
 if(!file_exists("/var/www/albums/$album/masters")){ nok("Album Has No Masters Dir"); }
 
+// TODO: fetch thumbnail states too?
 $pics = getPicListForAlbum($album);
 
 header('Cache-Control: no-cache, must-revalidate');

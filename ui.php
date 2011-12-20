@@ -37,13 +37,14 @@ ul { list-style-type: none; margin:0; padding:0; }
 ul li { text-align: center; padding:5px; border-bottom:1px solid #666; background-color:rgba(0,0,0,0.3); }
 ul li:nth-child(even) { background-color:rgba(0,0,0,0.8); }
 .thumb:hover { background-color:rgba(255,255,200,1.0); }
+.thumb { background:url(spinner.gif) center center no-repeat; }
 #home { height: 85px; }
 #leftnavbg { position:aboslute; top:0; left:0; width:138px; height:3000px; background-color:#666;
  opacity: 0.7; box-shadow:rgba(0,0,0,0.7) 10px 0px; display:none; }
 #leftnav { display:block; position:aboslute; top:0; left:0; width:138px; height:100%; }
 #leftnav h1 { text-align:center; }
 #picscroll { height:500px; cursor: grab; cursor: -moz-grab; cursor: -webkit-grab; overflow:auto; padding-bottom:100px; }
-#picscroll img { display:block; background-size:contain; width:128px; }
+#picscroll img { display:block; background-size:contain; width:128px; height:128px; }
 #maindisplay { display:block; position:absolute; top:0; left:138px;
  background-repeat: no-repeat; background-size:contain;
  width:80%; height:100%; outline:0; }
@@ -79,6 +80,35 @@ ul li:nth-child(even) { background-color:rgba(0,0,0,0.8); }
 echo "var albumObj = " . json_encode(array("id" => $album, "pics" => getPicListForAlbum($album))) . ";\n";
 echo "loadAlbum();\n";
 ?>
+
+// if we fail to load one of the thumbs, show a spinner and try again in a second.
+function retryThumb(img) {
+  var curAttempt = img.data('attempt');
+  console.log('retrying url '+img.attr('src'));
+  var curTime = (new Date).getTime();
+  img.attr('src',img.data('origSrc')+'?q='+curAttempt+'&t='+curTime);
+}
+
+$('img').error(function() {
+  var curAttempt = $(this).data('attempt');
+  if(undefined === curAttempt){ curAttempt = 1; }
+  curAttempt++;
+  $(this).data('attempt', curAttempt);
+  if(undefined === $(this).data('origSrc')){ // save the original source url
+    $(this).data('origSrc',$(this).attr('src'));
+  }
+  if(curAttempt > 15) {
+    console.log("Too many tries to fetch "+this.src+", giving up.\n");
+  } else {
+    var retryTimeout = 500; // how many ms to wait before retrying.
+    if(curAttempt >= 4){ retryTimeout = 1000; }
+    if(curAttempt >= 7){ retryTimeout = 2000; }
+    if(curAttempt >= 11){ retryTimeout = 4000; }
+    if(curAttempt >= 14){ retryTimeout = 10000; }      
+    console.log('Attempt '+curAttempt+' to load '+this.src+'...');
+    setTimeout(retryThumb,retryTimeout,$(this));
+  }
+});
 
 // resize scroll and handle vertical drags
 var amScrolling = 0;

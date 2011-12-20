@@ -22,6 +22,7 @@ $file_in = fopen("php://input",'r');
 $file_out = fopen("../albums/$album/masters/$fname.partial",'w');
 $recsize = 0;
 while (!feof($file_in)) $recsize += fwrite($file_out,fread($file_in,32*1024));
+ignore_user_abort(true);
 fclose($file_in);
 fclose($file_out);
 
@@ -35,9 +36,9 @@ if($recsize == $fsize) {
 }
 // Okay, let the user know we have the file - and don't let an interrupt or timeout keep us from making thumbs!
 flush();
-ignore_user_abort(true);
 
 // Let's pronto squirt out the EXIF thumbnail into the thumb_100 folder (we'll overwrite it later with a proper conversion)
 exec("/usr/bin/jhead -st ../albums/$album/thumb_100/$fname ../albums/$album/masters/$fname");
 
-// TODO: asynchronously enqueue the conversion job here. Right now, we'll just do it by hand.
+// HACK: touch a file in the work-queue folder to tell our thumbnail generation task that that picture needs to be re-thumbed.
+touch("../work-queue/$album.$fname") || die("can't create work unit");
