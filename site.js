@@ -200,7 +200,7 @@ function thumbClickCheck(evt) {
   console.log("Hm, check to see if we meant to click on a thumbnail.");
   if(amScrolling != 2){
     curImage = $(this).attr('pic');
-    history.pushState({'album':album,'curImage':curImage,'action':'picView'},'Viewing Picture: '+album,'/album/'+album+'/#curImage='+curImage);
+    history.pushState({'album':album,'curImage':curImage,'action':'picView'},'Viewing Picture: '+album,'/album/'+album+'/#'+curImage);
     showMainImage();
   }
 }
@@ -349,8 +349,8 @@ window.addEventListener('popstate', function(event) {
 			    var path = window.location.pathname.slice(1).split('/');
 			    if('album' == path[0]) {
 			      album = path[1];
-			      if('' !== path[2]){
-				curImage = path[2];
+			      if('' !==  window.location.hash.slice(1)){
+				curImage =  window.location.hash.slice(1);
 			      }
 			      albumViewInit();
 			    } else {
