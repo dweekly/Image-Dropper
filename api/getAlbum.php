@@ -5,8 +5,8 @@ $album = $_GET['album'];
 
 if(!$album){ nok("No Album"); }
 if(!preg_match("/^[a-z0-9]+$/",$album)){ nok("Invalid Album Chars"); }
-if(!file_exists("/var/www/albums/$album")){ nok("Album Does Not Exist"); }
-if(!file_exists("/var/www/albums/$album/masters")){ nok("Album Has No Masters Dir"); }
+if(!file_exists($ALBUM_ROOT_DIR.$album)){ nok("Album Does Not Exist"); }
+if(!file_exists($ALBUM_ROOT_DIR.$album."/masters")){ nok("Album Has No Masters"); }
 
 // TODO: fetch thumbnail states too?
 $pics = getPicListForAlbum($album);

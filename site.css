@@ -1,3 +1,17 @@
+/* Define custom fonts (loaded from Google - basically just http://fonts.googleapis.com/css?family=Viga|Tangerine) */
+@font-face { 
+  font-family: 'Viga';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Viga-Regular'), url('http://themes.googleusercontent.com/static/fonts/viga/v1/hRYG5a73hsnE-Hek-8TjTfesZW2xOQ-xsNqO47m55DA.woff') format('woff');
+}
+@font-face { 
+  font-family: 'Tangerine';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Tangerine'), url('http://themes.googleusercontent.com/static/fonts/tangerine/v2/HGfsyCL5WASpHOFnouG-RLO3LdcAZYWl9Si6vvxL-qU.woff') format('woff');
+}
+
 body { height: 100%; margin:0; padding:0; overflow:hidden;
 background:
   radial-gradient(black 15%, transparent 16%) 0 0,
@@ -14,6 +28,9 @@ background:
 background-color:#282828;
 background-size:16px 16px;;
 }
+
+/* Front Page Section */
+#frontpage-view { display: none; }
 H1 { font-family: 'Viga', sans-serif; text-align:Center; font-size:4em; color:rgba(255,255,255,0.5); text-shadow:2px 2px 2px #333; }
 #progressDiv { text-align:center; background-color:rgba(255,255,200,0.7); padding:1em; margin:1em 2em 0 2em; border-radius:15px; }
 #droptarget {font-weight:bold; background-color:rgba(200,255,200,0.7); text-align:center; padding:1em; border:1px dashed #0c0; font-size:2.5em; border-radius:15px;
@@ -21,3 +38,21 @@ text-shadow:2px 2px 2px #ddd; margin:1em 2em 0 2em;
 }
 #droptarget.dragOver { background-color: #ffc; border:1px solid #f33; }
 #explain { font-family:Tangerine, cursive; padding:2em 3em; line-height:1.35em; color:rgba(255,255,255,0.6); font-size:2.5em; text-align:center; }
+
+/* Album View Section */
+#album-view { display: none; }
+ul { list-style-type: none; margin:0; padding:0; }
+ul li { text-align: center; padding:5px; border-bottom:1px solid #666; background-color:rgba(0,0,0,0.3); }
+ul li:nth-child(even) { background-color:rgba(0,0,0,0.8); }
+.thumb:hover { background-color:rgba(255,255,200,1.0); }
+.thumb { background:url(spinner.gif) center center no-repeat; }
+#home { height: 85px; }
+#leftnavbg { position:aboslute; top:0; left:0; width:138px; height:3000px; background-color:#666;
+ opacity: 0.7; box-shadow:rgba(0,0,0,0.7) 10px 0px; display:none; }
+#leftnav { display:block; position:aboslute; top:0; left:0; width:138px; height:100%; }
+#leftnav h1 { text-align:center; }
+#picscroll { height:500px; cursor: grab; cursor: -moz-grab; cursor: -webkit-grab; overflow:auto; padding-bottom:100px; }
+#picscroll img { display:block; background-size:contain; width:128px; height:128px; }
+#maindisplay { display:block; position:absolute; top:0; left:138px;
+ background-repeat: no-repeat; background-size:contain;
+ width:80%; height:100%; outline:0; }

@@ -8,16 +8,16 @@ do {
   for ($i=0; $i<6; $i++) { 
     $album .= $alnum[rand(0,35)];
   }
-} while(file_exists("../albums/$album"));
+} while(file_exists($ALBUM_ROOT_DIR.$album));
 
-mkdir("../albums/$album") || nok("Could not create $album");
-mkdir("../albums/$album/masters");
-mkdir("../albums/$album/thumb_100");
-mkdir("../albums/$album/thumb_256");
-mkdir("../albums/$album/thumb_1024");
-mkdir("../albums/$album/thumb_1920");
+mkdir($ALBUM_ROOT_DIR.$album) || nok("Could not create $album",500);
+mkdir($ALBUM_ROOT_DIR.$album."/masters");
+mkdir($ALBUM_ROOT_DIR.$album."/thumb_100");
+mkdir($ALBUM_ROOT_DIR.$album."/thumb_256");
+mkdir($ALBUM_ROOT_DIR.$album."/thumb_1024");
+mkdir($ALBUM_ROOT_DIR.$album."/thumb_1920");
 
+header('Content-Type: application/json');
 header('Cache-Control: no-cache, must-revalidate');
 header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
-header('Content-type: application/json');
 echo json_encode(array("album" => $album));
