@@ -1,5 +1,5 @@
 // This JS file contains all of the site's frontend logic.
-// TODO: minify/compress this.
+// TODO: minify/compress this, statically build new permaexpires versions.
 
 var filesUploading = [];
 var album; // current album.
@@ -21,16 +21,26 @@ function doneFile() {
 // switch to the album view.
 function doneAllFiles() {
   filesUploading = [];
-  // don't need to do the below, since we've already initialized the album view.
-  //$("#frontpage-view").hide();
-  //  albumViewInit();
+
+  // now that we're all done uploading all the files, let's kick off a request to
+  // load the album from the server instead of using the fake albumObj above.
+  var curTime = (new Date).getTime();
+  $.get("/api/getAlbum.php?album="+album+"&atTime="+curTime,
+	function(data) {
+	  albumObj = data.album;
+	  loadAlbum();
+	}, 'json');
 }
 
 function updateProgress(evt,whatFile,xhr) {
   // console.log('Progress on file '+whatFile+': loaded '+evt.loaded+' of '+evt.total);
+  // file name is at f.name
+  var fname = filesUploading[whatFile].name;
   var delta = (evt.loaded - filesUploading[whatFile].bytesUploaded);
   var totalBytesUploaded = $("#progressBytes").val() + delta;
-  $("#progressBytes").val(totalBytesUploaded);
+  //  $("#progressBytes").val(totalBytesUploaded);
+  // HACK FIXME
+  $("#".fname).html(evt.loaded);
   filesUploading[whatFile].bytesUploaded = evt.loaded;
 }
 
@@ -122,7 +132,6 @@ function uploadAndCreateAlbum() {
     return false;
   }
 
-  $("#droptarget").hide();
   $("#totalFiles").html(totalFilesToUpload);
   $("#doneFiles").html(0);
   $("#progressBytes").attr("max",totalBytesToUpload);
@@ -137,7 +146,12 @@ function uploadAndCreateAlbum() {
   // let's switch to the album view while the files upload. (TODO: show progress bars on each photo as they upload!)
   $("#frontpage-view").hide();
   history.pushState({'album':album,'action':'albumView'},'Viewing Album: '+album,'/album/'+album);
-  albumViewInit();
+  $("#album-view").show();
+
+  // mildly hacky: set the album object as if the album was all set to go and fire off the album view.
+  // we kind of need to do this right away to be able to show progress in the album view.
+  albumObj.pics = filesUploading;
+  loadAlbum();
 }
 
 // Called to initialize the "front page" view when we kick off the web app.
@@ -173,10 +187,8 @@ function frontpageViewInit() {
     $("#droptarget").on('dragleave dragend', dragLeave);
     $("#droptarget").on('drop', drop);
   } else {
-    $("#droptarget").hide();
     $("#files").change(function(evt){
 			 filesUploading = evt.target.files;
-			 $("#files").hide();
 			 uploadAndCreateAlbum();
 		       });
   }
@@ -197,11 +209,14 @@ function retryImage(img) {
 
 // when someone clicks on a picture, make it the main one.
 function thumbClickCheck(evt) {
-  console.log("Hm, check to see if we meant to click on a thumbnail.");
+  // console.log("Hm, check to see if we meant to click on a thumbnail.");
   if(amScrolling != 2){
-    curImage = $(this).attr('pic');
-    history.pushState({'album':album,'curImage':curImage,'action':'picView'},'Viewing Picture: '+album,'/album/'+album+'/#'+curImage);
-    showMainImage();
+    var clickedImage = $(this).attr('id');
+    if(clickedImage !== curImage){
+      curImage = clickedImage;
+      history.pushState({'album':album,'curImage':curImage,'action':'picView'},'Viewing Picture: '+album,'/album/'+album+'/#'+curImage);
+      showMainImage();
+    }
   }
 }
 
@@ -248,7 +263,12 @@ function loadAlbum(){
 		 thdir = "thumb_exif";
 	       }
 	     }
-	     thumbLIs += "<li class=\"thumb\" pic=\""+img+"\"><img src=\"/album/"+albumObj.id+"/"+thdir+"/"+img+"\" /></li>";
+	     // if we're uploading, show what progress we've made, otherwise, use an appropriate thumbnail.
+	     if(undefined !== picObj.status && 'uploading' === picObj.status){
+	       thumbLIs += "<li class=\"thumbProgress\" id=\""+img+"\"><progress value=\""+picObj.bytesUploaded+"\" max=\""+picObj.size+"\"></progress> </li>";
+	     } else {
+	       thumbLIs += "<li class=\"thumb\" id=\""+img+"\"><img src=\"/album/"+album+"/"+thdir+"/"+img+"\" /></li>";
+	     }
 	   }
 	 });
 
@@ -263,23 +283,23 @@ function loadAlbum(){
   $("#picscroll").
     height($(window).height()-$("#home").height()-10).
     mousedown(function(evt){
-		console.log("may be scrolling?");
+		//		console.log("may be scrolling?");
 		amScrolling = 1; // may be scrolling? could just be clicking.
 		$(this).data('y', evt.clientY).data('scrollTop', this.scrollTop);
 		return false; }).
     mouseup(function(evt){
-	      console.log("not scrolling, mouse is up.");
+	      //	      console.log("not scrolling, mouse is up.");
 	      amScrolling = 0; // definitely not scrolling anymore.
 	    }).
     mouseleave(function(evt){
-		 console.log("not scrolling, mouse left");
+		 //		 console.log("not scrolling, mouse left");
 		 amScrolling = 0; // definitely not scrolling anymore.
 	       }).
     mousemove(function(evt){
 		if(amScrolling == 1){ // maybe scrolling...
 		  // see if I have dragged far enough to definitely be scrolling
 		  if(Math.abs($(this).data('y') - evt.clientY) > 20){
-		    console.log("ok, mouse definitely scrolling now.");
+		    //		    console.log("ok, mouse definitely scrolling now.");
 		    amScrolling = 2;
 		  }
 		}
@@ -330,9 +350,9 @@ function showMainImage(){
 // initialize the album view!
 function albumViewInit(){
   if(undefined === album){ alert("Album was expected!"); }
+  $("#album-view").show();
 
   // TODO: show a spinner or something while we load the album view?
-  $("#album-view").show();
   $.get("/api/getAlbum.php?album="+album,
 	function(data) {
 	  albumObj = data.album;
