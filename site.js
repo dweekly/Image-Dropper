@@ -252,10 +252,12 @@ function loadAlbum(){
   // TODO: use bigger thumbs if on a much bigger display?
   // TODO: cache the lists more aggressively?
 
+  var needToRecheckAlbum = false;
+
   $.each(albumObj.pics,
 	 function(img, picObj){
 	   if(img){
-	     var thdir = "masters";
+	     var thdir = undefined;
 	     if(picObj.th100){
 	       thdir = "thumb_100";
 	     } else {
@@ -263,14 +265,32 @@ function loadAlbum(){
 		 thdir = "thumb_exif";
 	       }
 	     }
+	     if(undefined === thdir){
+	       // okay, looks like we haven't made thumbs yet for this image.
+	       // we're going to need to recheck the album to poll progress.
+	       needToRecheckAlbum = true;
+	     }
 	     // if we're uploading, show what progress we've made, otherwise, use an appropriate thumbnail.
-	     if(undefined !== picObj.status && 'uploading' === picObj.status){
+	     if(thdir == "" || undefined !== picObj.status && 'uploading' === picObj.status){
 	       thumbLIs += "<li class=\"thumbProgress\" id=\""+img+"\"><progress value=\""+picObj.bytesUploaded+"\" max=\""+picObj.size+"\"></progress> </li>";
 	     } else {
 	       thumbLIs += "<li class=\"thumb\" id=\""+img+"\" style=\"background:url(/album/"+album+"/"+thdir+"/"+img+") center center no-repeat\" /></li>";
 	     }
 	   }
 	 });
+
+  // if we didn't get all the thumbs, assume the server is still busy processing them.
+  // HACK FIXME the above is a pretty poor assumption
+  // for now, retry every three seconds - TODO: exponential fallback
+  if(needToRecheckAlbum){
+    setTimeout(function(){
+		 $.get("/api/getAlbum.php?album="+album,
+		       function(data) {
+			 albumObj = data.album;
+			 loadAlbum();
+		       }, 'json');
+	       },3000);
+  }
 
   $("#piclist").html('');
   $("#piclist").append(thumbLIs);
@@ -340,7 +360,11 @@ function showMainImage(){
   else if(curPic.th256 && mainwidth < 256){ tdir = "/thumb_256/"; } 
   else if(curPic.th1024 && mainwidth < 1024){ tdir = "/thumb_1024/"; } 
   else if(curPic.th1920 && mainwidth < 1920){ tdir = "/thumb_1920/"; } 
-  else tdir = '/masters/';
+  else {
+    tdir = '/masters/';
+    // okay, we failed to find any appropriate reduced version of the master image.
+    // don't bother trying to reload it from the server, just use the master for now.
+  }
 
   //  $("#maindisplay").html("<img id=\"mainImage\" src=\"/album/"+albumObj.id+tdir+curImage+"\" />");
   $("#maindisplay img").error(function(){imageError($(this));});
