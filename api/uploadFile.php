@@ -23,7 +23,8 @@ $escFname = str_replace(" ","\\ ",$fname);
 
 // read in the input file name 32KB at a time and write to temp file.
 $file_in = fopen("php://input",'r');
-$file_out = fopen($ALBUM_ROOT_DIR.$album."/masters/$fname.partial",'w');
+$partial = $ALBUM_ROOT_DIR.$album."/masters/$fname.partial";
+$file_out = fopen($partial,'w');
 $recsize = 0;
 $recsize += fwrite($file_out,fread($file_in,32*1024));
 
@@ -32,12 +33,19 @@ fflush($file_out);
 $rot = system("/usr/bin/jpegexiforient -n ".$ALBUM_ROOT_DIR.$album."/masters/$fname.partial");
 
 // generate a thumbnail from the partial upload...
-exec("/usr/bin/jhead -st ".$ALBUM_ROOT_DIR.$album."/thumb_exif/$fname ".$ALBUM_ROOT_DIR.$album."/masters/$fname.partial");
+$exif = $ALBUM_ROOT_DIR.$album."/thumb_exif/$escFname";
+exec("/usr/bin/jhead -st $exif.prerot $partial");
 
 // and rotate it appropriately.
-if($rot == 3) { exec("/usr/bin/jpegtran -copy none -rotate 180 ".$ALBUM_ROOT_DIR.$album."/thumb_exif/$escFname"); }
-if($rot == 6) { exec("/usr/bin/jpegtran -copy none -rotate 90  ".$ALBUM_ROOT_DIR.$album."/thumb_exif/$escFname"); }
-if($rot == 8) { exec("/usr/bin/jpegtran -copy none -rotate 270 ".$ALBUM_ROOT_DIR.$album."/thumb_exif/$escFname"); }
+if(3 == $rot) { exec("/usr/bin/jpegtran -copy none -rotate 180 $exif.prerot > $exif"); }
+if(6 == $rot) { exec("/usr/bin/jpegtran -copy none -rotate 90  $exif.prerot > $exif"); }
+if(8 == $rot) { exec("/usr/bin/jpegtran -copy none -rotate 270 $exif.prerot > $exif"); }
+if(!file_exists($exif)){
+  rename("$exif.prerot", $exif);
+}
+if(file_exists("$exif.prerot")){
+  unlink("$exif.prerot");
+ }
 
 // now finish reading in the rest of the file being uploaded...!
 while (!feof($file_in)) $recsize += fwrite($file_out,fread($file_in,32*1024));

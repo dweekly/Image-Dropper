@@ -267,7 +267,7 @@ function loadAlbum(){
 	     if(undefined !== picObj.status && 'uploading' === picObj.status){
 	       thumbLIs += "<li class=\"thumbProgress\" id=\""+img+"\"><progress value=\""+picObj.bytesUploaded+"\" max=\""+picObj.size+"\"></progress> </li>";
 	     } else {
-	       thumbLIs += "<li class=\"thumb\" id=\""+img+"\"><img src=\"/album/"+album+"/"+thdir+"/"+img+"\" /></li>";
+	       thumbLIs += "<li class=\"thumb\" id=\""+img+"\" style=\"background:url(/album/"+album+"/"+thdir+"/"+img+") center center no-repeat\" /></li>";
 	     }
 	   }
 	 });
@@ -342,9 +342,9 @@ function showMainImage(){
   else if(curPic.th1920 && mainwidth < 1920){ tdir = "/thumb_1920/"; } 
   else tdir = '/masters/';
 
-  $("#maindisplay").html("<img id=\"mainImage\" src=\"/album/"+albumObj.id+tdir+curImage+"\" />");
+  //  $("#maindisplay").html("<img id=\"mainImage\" src=\"/album/"+albumObj.id+tdir+curImage+"\" />");
   $("#maindisplay img").error(function(){imageError($(this));});
-  //  $("#maindisplay").css('background-image','url(/album/'+albumObj.id+tdir+curImage+')');
+  $("#maindisplay").css('background-image','url(/album/'+albumObj.id+tdir+curImage+')');
 };
 
 // initialize the album view!

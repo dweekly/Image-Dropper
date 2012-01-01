@@ -26,11 +26,7 @@
 
 <!-- The album view -->
 <div id="album-view">
-  <div id="leftnavbg"></div>
   <div id="leftnav">
-    <div id="home">
-      <h2 id="albumname">Album</h1>
-    </div>
     <div id="picscroll">
       <ul id="piclist"></ul>
     </div>
@@ -42,6 +38,8 @@
 <?
 
 // enable the HTML5 URLs to actually load the proper album / picture / etc
+// Technically, we could just do this in JS and CDN this static HTML,
+// but it seems...cruel to ask the browser to go fetch this back from us?
 if($_GET['album']){
   require_once("api/lib.inc");
   $album = $_GET['album'];

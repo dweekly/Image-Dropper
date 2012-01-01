@@ -45,9 +45,9 @@ ul { list-style-type: none; margin:0; padding:0; }
 ul li { text-align: center; padding:5px; border-bottom:1px solid #666; background-color:rgba(0,0,0,0.3); }
 ul li:nth-child(even) { background-color:rgba(0,0,0,0.8); }
 .thumb:hover { background-color:rgba(255,255,200,1.0); }
-.thumb { background:url(spinner.gif) center center no-repeat; }
+.thumb { width:128px; height:128px; }
 .thumbProgress { background:url(spinner.gif) center center no-repeat; }
-#home { height: 85px; }
+#home { height: 0px; }
 #leftnavbg { position:aboslute; top:0; left:0; width:138px; height:3000px; background-color:#666;
  opacity: 0.7; box-shadow:rgba(0,0,0,0.7) 10px 0px; display:none; }
 #leftnav { display:block; position:aboslute; top:0; left:0; width:138px; height:100%; }
